@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #my-slider {
+        position: relative;
+        width: 790px;
+      }
+
+      .slider-list ul {
+        list-style-type: none;
+        position: relative;
+        padding: 0;
+        margin: 0;
+      }
+
+      .slider-list__item,
+      .slider-list__item--selected {
+        position: absolute;
+        transition: opacity 1s;
+        opacity: 0;
+        text-align: center;
+      }
+
+      .slider-list__item--selected {
+        transition: opacity 1s;
+        opacity: 1;
+      }
+      .slide-list__next,
+      .slide-list__previous {
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        background-color: aqua;
+        position: relative;
+      }
+      .slide-list__previous {
+        background-color: yellow;
+      }
+
+      .slide-list__control-buttons,
+      .slide-list__control-buttons--selected {
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: gray;
+        position: relative;
+      }
+      .slide-list__control-buttons--selected {
+        background-color: hotpink;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="my-slider" class="slider-list">
+      <ul>
+        <li class="slider-list__item--selected">
+          <img src="./1.webp" alt="" />
+        </li>
+        <li class="slider-list__item">
+          <img src="./2.webp" alt="" />
+        </li>
+        <li class="slider-list__item">
+          <img src="./3.webp" alt="" />
+        </li>
+        <li class="slider-list__item">
+          <img src="./4.webp" alt="" />
+        </li>
+      </ul>
+
+      <a class="slide-list__previous"></a>
+      <a class="slide-list__next"></a>
+      <div class="slide-list__control">
+        <span class="slide-list__control-buttons--selected"></span>
+        <span class="slide-list__control-buttons"></span>
+        <span class="slide-list__control-buttons"></span>
+        <span class="slide-list__control-buttons"></span>
+      </div>
+    </div>
+
+    <script>
+      class Slider {
+        constructor(id, cycle = 3000) {
+          this.container = document.getElementById(id);
+          this.items = this.container.querySelectorAll(
+            ".slider-list__item, .slider-list__item--selected"
+          );
+          this.cycle = cycle;
+
+          const controller = this.container.querySelector(
+            ".slide-list__control"
+          );
+          if (controller) {
+            const buttons = controller.querySelectorAll(
+              ".slide-list__control-buttons, .slide-list__control-buttons--selected"
+            );
+            controller.addEventListener("mouseover", (evt) => {
+              const idx = Array.from(buttons).indexOf(evt.target);
+              if (idx >= 0) {
+                this.slideTo(idx);
+                this.stop();
+              }
+            });
+
+            controller.addEventListener("mouseout", (evt) => {
+              this.start();
+            });
+
+            this.container.addEventListener("slide", (evt) => {
+              const idx = evt.detail.index;
+              const selected = controller.querySelector(
+                ".slide-list__control-buttons--selected"
+              );
+              if (selected) selected.className = "slide-list__control-buttons";
+              if (buttons[idx])
+                buttons[idx].className = "slide-list__control-buttons--selected";
+            });
+          }
+
+          const previous = this.container.querySelector(
+            ".slide-list__previous"
+          );
+          if (previous) {
+            previous.addEventListener("click", (evt) => {
+              evt.preventDefault();
+              this.stop();
+              this.slidePrevious();
+              this.start();
+            });
+          }
+
+          const next = this.container.querySelector(".slide-list__next");
+          if (next) {
+            next.addEventListener("click", (evt) => {
+              evt.preventDefault();
+              this.stop();
+              this.slideNext();
+              this.start();
+            });
+          }
+        }
+
+        getSelectedItem() {
+          const selected = this.container.querySelector(
+            ".slider-list__item--selected"
+          );
+          return selected;
+        }
+
+        getSelectedItemIndex() {
+          return Array.from(this.items).indexOf(this.getSelectedItem());
+        }
+
+        slideTo(idx) {
+          const selected = this.getSelectedItem();
+          if (selected) selected.className = "slider-list__item";
+          const item = this.items[idx];
+          if (item) item.className = "slider-list__item--selected";
+
+          const detail = { index: idx };
+          const event = new CustomEvent("slide", { bubbles: true, detail });
+          this.container.dispatchEvent(event);
+        }
+
+        slideNext() {
+          const currentIdx = this.getSelectedItemIndex();
+          const nextIdx = (currentIdx + 1) % this.items.length;
+          this.slideTo(nextIdx);
+        }
+
+        slidePrevious() {
+          const currentIdx = this.getSelectedItemIndex();
+          const previousIdx =
+            (this.items.length + currentIdx - 1) % this.items.length;
+          this.slideTo(previousIdx);
+        }
+
+        start() {
+          this.stop();
+          this._timer = setInterval(() => this.slideNext(), this.cycle);
+        }
+        stop() {
+          clearInterval(this._timer);
+        }
+      }
+
+      const slider = new Slider("my-slider");
+      slider.start();
+    </script>
+  </body>
+</html>

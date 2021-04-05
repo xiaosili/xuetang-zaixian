@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #input {
+      display: none;
+    }
+    #label::after {
+      position: absolute;
+      content: 'xxx';
+    }
+    .content {
+      color: hotpink;
+      transition: all 1s;
+    }
+    #input:checked + .content {
+      color: blue;
+      transition: all 1s;
+    }
+  </style>
+</head>
+<body>
+  <input type="checkbox" id="input">
+  <div class="content">
+    <p>123ckdkkd</p>
+    <p>shenyeshitag</p>
+    <label for="input" id="label"></label>
+  </div>
+</body>
+</html>
